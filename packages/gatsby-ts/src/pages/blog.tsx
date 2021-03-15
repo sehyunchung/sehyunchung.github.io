@@ -53,7 +53,7 @@ function BlogIndex(props) {
 
           return (
             <li key={node.id}>
-              <Link to={node.fields.slug}>
+              <Link to={`/blog${node.fields.slug}`}>
                 <h2>{title}</h2>
               </Link>
               <span>{node.frontmatter.date}</span>

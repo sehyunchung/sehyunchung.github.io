@@ -1,5 +1,5 @@
 const path = require('path')
-const _ = require('lodash')
+const kebabCase = require('lodash/kebabCase')
 
 const { createFilePath } = require('gatsby-source-filesystem')
 
@@ -14,6 +14,7 @@ exports.createPages = ({ graphql, actions }) => {
     `
       {
         postsMdx: allMdx(
+          filter: { fileAbsolutePath: { glob: "**/content/blog/**/*" } }
           sort: { fields: [frontmatter___date], order: DESC }
           limit: 1000
         ) {
@@ -33,9 +34,6 @@ exports.createPages = ({ graphql, actions }) => {
             fieldValue
           }
         }
-        about: mdx(fileAbsolutePath: { glob: "**/pages/about.*" }) {
-          body
-        }
       }
     `
   ).then((result) => {
@@ -49,14 +47,12 @@ exports.createPages = ({ graphql, actions }) => {
     // Create tags pages.
     const tags = result.data.tagsGroup.group
 
-    const about = result.data.about
-
     posts.forEach((post, index) => {
       const previous = index === posts.length - 1 ? null : posts[index + 1].node
       const next = index === 0 ? null : posts[index - 1].node
 
       createPage({
-        path: post.node.fields.slug,
+        path: `/blog${post.node.fields.slug}`,
         component: BlogPost,
         context: {
           slug: post.node.fields.slug,
@@ -68,20 +64,12 @@ exports.createPages = ({ graphql, actions }) => {
 
     tags.forEach((tag) => {
       createPage({
-        path: `/tags/${_.kebabCase(tag.fieldValue)}/`,
+        path: `/tags/${kebabCase(tag.fieldValue)}/`,
         component: TagTemplate,
         context: {
           tag: tag.fieldValue,
         },
       })
-    })
-
-    createPage({
-      path: '/about/',
-      component: About,
-      context: {
-        body: about.body,
-      },
     })
 
     return null
